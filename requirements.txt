@@ -21,13 +21,25 @@ charset-normalizer==3.3.2
 click==8.1.7
     # via streamlit
 colorama==0.4.6
-    # via click
+    # via
+    #   click
+    #   tqdm
+decorator==4.4.2
+    # via moviepy
+ffmpeg-python==0.2.0
+    # via -r requirements.in
+future==1.0.0
+    # via ffmpeg-python
 gitdb==4.0.11
     # via gitpython
 gitpython==3.1.43
     # via streamlit
 idna==3.7
     # via requests
+imageio==2.34.2
+    # via moviepy
+imageio-ffmpeg==0.5.1
+    # via moviepy
 jinja2==3.1.4
     # via
     #   altair
@@ -42,9 +54,13 @@ markupsafe==2.1.5
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
+moviepy==1.0.3
+    # via -r requirements.in
 numpy==2.0.0
     # via
     #   altair
+    #   imageio
+    #   moviepy
     #   pandas
     #   pyarrow
     #   pydeck
@@ -58,7 +74,11 @@ pandas==2.2.2
     #   altair
     #   streamlit
 pillow==10.4.0
-    # via streamlit
+    # via
+    #   imageio
+    #   streamlit
+proglog==0.1.10
+    # via moviepy
 protobuf==5.27.2
     # via streamlit
 pyarrow==17.0.0
@@ -76,7 +96,10 @@ referencing==0.35.1
     #   jsonschema
     #   jsonschema-specifications
 requests==2.32.3
-    # via streamlit
+    # via
+    #   -r requirements.in
+    #   moviepy
+    #   streamlit
 rich==13.7.1
     # via streamlit
 rpds-py==0.19.0
@@ -97,6 +120,10 @@ toolz==0.12.1
     # via altair
 tornado==6.4.1
     # via streamlit
+tqdm==4.66.4
+    # via
+    #   moviepy
+    #   proglog
 typing-extensions==4.12.2
     # via streamlit
 tzdata==2024.1
@@ -105,3 +132,6 @@ urllib3==2.2.2
     # via requests
 watchdog==4.0.1
     # via streamlit
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
