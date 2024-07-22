@@ -5,7 +5,7 @@ import os
 import replicate
 import subprocess
 from tqdm import tqdm
-
+import datetime
 
 def split_video(input_file, num_clip):
     """
@@ -18,8 +18,15 @@ def split_video(input_file, num_clip):
     Returns:
         list: List of paths to the output clip files.
     """
+
+    current_timestamp = datetime.datetime.now()
+    formatted_timestamp = current_timestamp.strftime("%Y-%m-%d %H:%M:%S")
+    print(formatted_timestamp)
+
+    directory = str(int(current_timestamp.timestamp()))
     # Initialize PowerShell command
-    command = ["powershell", "-File", "./video_split.ps1", str(input_file), str(num_clip)]
+    command = ["powershell", "-File", "./video_split.ps1", str(input_file), str(num_clip), directory]
+    print("start subprocess")
     result = subprocess.run(command, capture_output=True, text=True)
 
     # Initialize list of output files

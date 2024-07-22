@@ -1,11 +1,11 @@
 param (
     [string]$input_file,
-    [int]$num_clips
+    [int]$num_clips,
+    [string]$clips_dir
 )
 
 $filename = [System.IO.Path]::GetFileNameWithoutExtension($input_file)
 
-$clips_dir = "video/clips"
 if (-Not (Test-Path -Path $clips_dir)) {
     New-Item -ItemType Directory -Path $clips_dir
 }
