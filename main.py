@@ -82,7 +82,7 @@ if video_path:
     chosen_clip = created_clips[clip_number - 1]
     # Get video duration
     video_duration = get_video_duration(chosen_clip)
-    st.write(f"Video duration: {video_duration} seconds")
+    st.write(f"Clip duration: {video_duration} seconds")
 
     # Generate music based on prompt
     gened_music_url = music_generation(audio_prompt)
@@ -97,11 +97,13 @@ if video_path:
 
     st.success("Video processed successfully")
 
+
+
+
     if created_clips:
         st.write("Created clips:")
         clip_columns = st.columns([1] * num_clips)
         for i, clip_path in enumerate(created_clips):
-            clip_columns[i].write(clip_path)
 
             with clip_columns[i]:
                 ste.download_button(
@@ -110,7 +112,7 @@ if video_path:
                     file_name=os.path.basename(clip_path),
                     mime="video/mp4"
                 )
-                output_video_container, _ = st.columns([0.33, 0.67])
+                output_video_container, _ = st.columns([0.67,   0.33])
                 output_video_container.video(clip_path,
                                              format="video/mp4",
                                              start_time=0,
@@ -121,6 +123,7 @@ if video_path:
                                              muted=False)
 
         # Provide download link for the final video
+        created_clips.append(output_file)
         download_clip, download_zip = st.columns(2)
 
         with download_clip:
@@ -132,7 +135,8 @@ if video_path:
             )
         with download_zip:
             with zipfile.ZipFile(zip_file_path, 'w') as zipf:
-                zipf.write(output_file, os.path.basename(output_file))
+                for clip_path in created_clips:
+                    zipf.write(clip_path, os.path.basename(clip_path))
 
             with open(zip_file_path, 'rb') as zip_file:
                 st.download_button(
