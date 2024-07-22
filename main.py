@@ -7,6 +7,9 @@ import os
 import replicate
 from dotenv import load_dotenv
 import subprocess
+import zipfile
+
+
 
 from video_split import split_video
 from audio_gen import (
@@ -24,6 +27,7 @@ audio_file = "./audio/gen_sound.wav"
 looped_audio_file = "./audio/looped_audio.wav"
 video_without_audio = "./video/video_no_audio.mp4"
 output_file = "./video/output_video.mp4"
+zip_file_path = './video/all_clips.zip'
 
 # Load environment variables
 if os.getenv("REPLICATE_API_TOKEN") is None:
@@ -75,6 +79,24 @@ if video_path:
     st.write("Processing video...")
     created_clips = split_video(video_path, num_clips)
 
+    chosen_clip = created_clips[clip_number - 1]
+    # Get video duration
+    video_duration = get_video_duration(chosen_clip)
+    st.write(f"Video duration: {video_duration} seconds")
+
+    # Generate music based on prompt
+    gened_music_url = music_generation(audio_prompt)
+    download_music(gened_music_url)
+
+    # Loop audio to match video duration
+    loop_audio(audio_file, video_duration, looped_audio_file)
+
+    # Replace audio track in video
+    remove_audio_from_video(chosen_clip, video_without_audio)
+    add_audio_to_video(video_without_audio, looped_audio_file, output_file)
+
+    st.success("Video processed successfully")
+
     if created_clips:
         st.write("Created clips:")
         clip_columns = st.columns([1] * num_clips)
@@ -88,33 +110,38 @@ if video_path:
                     file_name=os.path.basename(clip_path),
                     mime="video/mp4"
                 )
-
-        chosen_clip = created_clips[clip_number - 1]
-        # Get video duration
-        video_duration = get_video_duration(chosen_clip)
-        st.write(f"Video duration: {video_duration} seconds")
-
-        # Generate music based on prompt
-        gened_music_url = music_generation(audio_prompt)
-        download_music(gened_music_url)
-
-        # Loop audio to match video duration
-        loop_audio(audio_file, video_duration, looped_audio_file)
-
-        # Replace audio track in video
-        remove_audio_from_video(chosen_clip, video_without_audio)
-        add_audio_to_video(video_without_audio, looped_audio_file, output_file)
-
-        st.success("Video processed successfully")
+                output_video_container, _ = st.columns([0.33, 0.67])
+                output_video_container.video(clip_path,
+                                             format="video/mp4",
+                                             start_time=0,
+                                             subtitles=None,
+                                             end_time=None,
+                                             loop=False,
+                                             autoplay=False,
+                                             muted=False)
 
         # Provide download link for the final video
-        # with open(output_file, "rb") as file:
-        st.download_button(
-            label="Download Final Video",
-            data=output_file,
-            file_name=os.path.basename(output_file),
-            mime="video/mp4"
-        )
+        download_clip, download_zip = st.columns(2)
+
+        with download_clip:
+            st.download_button(
+                label="Download Final Video",
+                data=output_file,
+                file_name=os.path.basename(output_file),
+                mime="video/mp4"
+            )
+        with download_zip:
+            with zipfile.ZipFile(zip_file_path, 'w') as zipf:
+                zipf.write(output_file, os.path.basename(output_file))
+
+            with open(zip_file_path, 'rb') as zip_file:
+                st.download_button(
+                    label="Download All Clips as ZIP",
+                    data=zip_file,
+                    file_name=os.path.basename(zip_file_path),
+                    mime="clips/zip"
+                )
+
         output_video_container, _ = st.columns([0.33, 0.67])
         output_video_container.video(output_file, format="video/mp4", start_time=0, subtitles=None, end_time=None, loop=False,
                  autoplay=False, muted=False)
