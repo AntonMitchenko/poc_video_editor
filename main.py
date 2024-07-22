@@ -11,7 +11,12 @@ import zipfile
 
 
 
-from video_split import split_video
+from video_split import (
+    generate_ranges,
+    split_video,
+    split_list
+)
+
 from audio_gen import (
     music_generation,
     download_music,
@@ -62,7 +67,12 @@ clip_number = st.sidebar.number_input(
 )
 
 # Input number of columns to display clips
-# num_columns = st.sidebar.number_input("Enter number of columns for displaying clips", min_value=1, step=1)
+num_columns = st.sidebar.number_input(
+    label="Enter number of columns for displaying clips",
+    min_value=1,
+    step=1,
+    value=3
+)
 
 # Process video and create clips
 if st.button("Process Video"):
@@ -97,56 +107,64 @@ if video_path:
 
     st.success("Video processed successfully")
 
-
-
-
     if created_clips:
         st.write("Created clips:")
-        clip_columns = st.columns([1] * num_clips)
-        for i, clip_path in enumerate(created_clips):
+        tabs = st.tabs(generate_ranges(num_clips, num_columns))
+        clips_per_tab = list(split_list(created_clips, num_columns))
 
-            with clip_columns[i]:
-                ste.download_button(
-                    label="Download " + os.path.basename(clip_path),
-                    data=clip_path,
-                    file_name=os.path.basename(clip_path),
-                    mime="video/mp4"
-                )
-                output_video_container, _ = st.columns([0.67,   0.33])
-                output_video_container.video(clip_path,
-                                             format="video/mp4",
-                                             start_time=0,
-                                             subtitles=None,
-                                             end_time=None,
-                                             loop=False,
-                                             autoplay=False,
-                                             muted=False)
+        for tab, clip_group in zip(tabs, clips_per_tab):
+            with tab:
+                clip_columns = st.columns([1] * num_columns)
+                for i, clip_path in enumerate(clip_group):
+
+                    with clip_columns[i]:
+                        output_video_container, _ = st.columns([0.67,   0.33])
+                        output_video_container.video(clip_path,
+                                                     format="video/mp4",
+                                                     start_time=0,
+                                                     subtitles=None,
+                                                     end_time=None,
+                                                     loop=False,
+                                                     autoplay=False,
+                                                     muted=False)
+                        ste.download_button(
+                            label="Download " + os.path.basename(clip_path),
+                            data=clip_path,
+                            file_name=os.path.basename(clip_path),
+                            mime="video/mp4"
+                        )
+
 
         # Provide download link for the final video
+
+        st.write("Created clips:")
+        output_video_container, _ = st.columns([0.33, 0.67])
+        output_video_container.video(output_file, format="video/mp4", start_time=0, subtitles=None, end_time=None, loop=False,
+                 autoplay=False, muted=False)
+
         created_clips.append(output_file)
         download_clip, download_zip = st.columns(2)
 
         with download_clip:
-            st.download_button(
+            ste.download_button(
                 label="Download Final Video",
                 data=output_file,
                 file_name=os.path.basename(output_file),
                 mime="video/mp4"
             )
+
         with download_zip:
             with zipfile.ZipFile(zip_file_path, 'w') as zipf:
                 for clip_path in created_clips:
                     zipf.write(clip_path, os.path.basename(clip_path))
 
-            with open(zip_file_path, 'rb') as zip_file:
-                st.download_button(
-                    label="Download All Clips as ZIP",
-                    data=zip_file,
-                    file_name=os.path.basename(zip_file_path),
-                    mime="clips/zip"
-                )
+            # with open(zip_file_path, 'rb') as zip_file:
+            ste.download_button(
+                label="Download All Clips as ZIP",
+                data=zip_file_path,
+                file_name=os.path.basename(zip_file_path),
+                mime="clips/zip"
+            )
 
-        output_video_container, _ = st.columns([0.33, 0.67])
-        output_video_container.video(output_file, format="video/mp4", start_time=0, subtitles=None, end_time=None, loop=False,
-                 autoplay=False, muted=False)
+
 

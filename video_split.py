@@ -50,3 +50,19 @@ def split_video(input_file, num_clip):
                 output_files.append(clip_path)
 
     return output_files
+
+
+def generate_ranges(num_clips, num_col):
+    ranges = []
+    start = 1
+
+    while start <= num_clips:
+        end = start + num_col
+        ranges.append(f"{start}-{end-1}")
+        start += num_col
+
+    return ranges
+
+def split_list(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
