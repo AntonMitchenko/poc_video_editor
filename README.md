@@ -51,15 +51,64 @@ pip install --user -r requirements.txt
 ```shell
 python -m streamlit run main.py
 ```
-
 2. Open your web browser and navigate to the provided local URL (typically http://localhost:8501).
+
+## Riffusion usage
+
+### Local
+To use it locally, you need a video card, which unfortunately I don’t have.
+
+If GPU exists, you can use the following command to generate tracks:
+```shell
+docker run -d -p 5000:5000 --gpus=all r8.im/riffusion/riffusion@sha256:8cf61ea6c56afd61d8f5b9ffd14d7c216c0a93844ce2d82ac1c9ecc9c7f24e05
+curl -s -X POST \
+  -H "Content-Type: application/json" \
+  -d $'{
+    "input": {
+      "alpha": 0.5,
+      "prompt_a": "funky synth solo",
+      "prompt_b": "90\'s rap",
+      "denoising": 0.75,
+      "seed_image_id": "agile",
+      "num_inference_steps": 50
+    }
+  }' \
+  http://localhost:5000/predictions
+```
+All information was taken from this [site](https://replicate.com/riffusion/riffusion?input=docker)
+
+### Api
+I chose to use the API to generate music.To do this, we need an API key that needs to be written to the env in the following way:
+```shell
+export REPLICATE_API_TOKEN=<paste-your-token-here>
+```
+Run riffusion using Replicate’s API:
+```shell
+output = replicate.run(
+    "riffusion/riffusion:8cf61ea6c56afd61d8f5b9ffd14d7c216c0a93844ce2d82ac1c9ecc9c7f24e05",
+    input={
+        "alpha": 0.5,
+        "prompt_a": "funky synth solo",
+        "prompt_b": "90's rap",
+        "denoising": 0.75,
+        "seed_image_id": "agile",
+        "num_inference_steps": 50
+    }
+)
+print(output)
+```
+All information how use Replicate`s API was taken from this [site](https://replicate.com/riffusion/riffusion?input=python)
+
 
 ## Project Structure
 
-- `app.py`: Main application script.
+- `main.py`: Main application script.
 - `requirements.in`: List of dependencies to be installed.
 - `requirements.txt`: Compiled list of dependencies.
 - `Dockerfile`: Docker configuration file for containerization.
+- `utils`: A folder that contains all the main functions
+- `docs`: A folder that contains the necessary installation guides
+- `video_for_exampls`: A folder that contains video for test 
 
 ## Deployment
 
