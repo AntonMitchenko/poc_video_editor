@@ -77,6 +77,7 @@ num_columns = st.sidebar.number_input(
     value=3
 )
 
+st.write("Riffusion additional settings:")
 # Input number of epochs for music generation
 num_epochs = st.sidebar.slider(
     label="Enter number of epochs for music generation",
@@ -86,6 +87,11 @@ num_epochs = st.sidebar.slider(
     value=33
 )
 
+#Seed spectrogram to use
+selected_option = st.sidebar.selectbox(
+    label="Seed spectrogram to use",
+    options=("vibes", "agile", "marim", "motorway", "og_beat")
+)
 
 # Process video and create clips
 if st.button("Process Video"):
@@ -151,7 +157,7 @@ if video_path:
 
     else:
         print("Running on Replicate")
-        gened_music_url = music_generation(audio_prompt, num_epochs)
+        gened_music_url = music_generation(audio_prompt, num_epochs, selected_option)
         download_music(gened_music_url)
 
     # Loop audio to match video duration

@@ -10,7 +10,7 @@ if os.getenv("REPLICATE_API_TOKEN") is None:
     load_dotenv('.env')
 
 
-def music_generation(prompt, epochs):
+def music_generation(prompt, epochs, seed):
     """
     Generates music based on a given text prompt using a specific AI model.
 
@@ -28,7 +28,7 @@ def music_generation(prompt, epochs):
             "alpha": 0,
             "prompt_a": audio_prompt,
             "denoising": 0.75,
-            "seed_image_id": "vibes",
+            "seed_image_id": seed,
             "num_inference_steps": epochs
         }
     )
