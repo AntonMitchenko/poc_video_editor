@@ -1,16 +1,13 @@
-import streamlit as st
-import streamlit_ext as ste
-import ffmpeg
-import moviepy.editor as mp
-import requests
+# Standard library imports
 import os
-import replicate
-from dotenv import load_dotenv
-import subprocess
 import zipfile
-import base64
 
-from utils import(
+# Third-party library imports
+import streamlit as st
+from dotenv import load_dotenv
+
+
+from utils import (
     generate_ranges,
     split_video,
     split_list,
@@ -44,7 +41,10 @@ if os.getenv("REPLICATE_API_TOKEN") is None:
 st.title('POC Video Editor')
 
 # Upload video file
-uploaded_file = st.sidebar.file_uploader("Choose a video file", type=["mp4", "mov", "avi"])
+uploaded_file = st.sidebar.file_uploader(
+    label="Choose a video file",
+    type=["mp4", "mov", "avi"]
+)
 
 # Input number of clips
 num_clips = st.sidebar.number_input(
@@ -86,7 +86,7 @@ num_epochs = st.sidebar.slider(
     value=33
 )
 
-#Seed spectrogram to use
+# Seed spectrogram to use
 selected_option = st.sidebar.selectbox(
     label="Seed spectrogram to use",
     options=("vibes", "agile", "marim", "motorway", "og_beat")
@@ -150,13 +150,7 @@ if video_path:
                                                      autoplay=False,
                                                      muted=False)
 
-                        with open(clip_path, 'rb') as out_clip:
-                            ste.download_button(
-                                label="Download " + os.path.basename(clip_path),
-                                data=out_clip,
-                                file_name=os.path.basename(clip_path),
-                                mime="video/mp4"
-                            )
+                        download(clip_path, "video/mp4", "Download " + os.path.basename(clip_path))
 
         created_clips.append(output_file)
 
@@ -178,13 +172,13 @@ if video_path:
                                          muted=False)
 
         with button_col:
-            download(output_file, "video/mp4")
+            download(output_file, "video/mp4", "Download final clip")
 
             with zipfile.ZipFile(zip_file_path, 'w') as zipf:
                 for clip_path in created_clips:
                     zipf.write(clip_path, os.path.basename(clip_path))
 
-            download(zip_file_path, "clips/zip")
+            download(zip_file_path, "clips/zip", "Download all clips in zip")
 
 
 
