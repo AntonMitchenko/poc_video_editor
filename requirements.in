@@ -3,3 +3,5 @@ ffmpeg-python
 moviepy
 requests
 replicate==0.28.0
+python-dotenv
+streamlit-ext

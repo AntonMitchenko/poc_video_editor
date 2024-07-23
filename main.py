@@ -34,6 +34,9 @@ video_without_audio = "./video/video_no_audio.mp4"
 output_file = "./video/output_video.mp4"
 zip_file_path = './video/all_clips.zip'
 
+# Define the URL for the POST request
+url = 'http://localhost:5000/predictions'
+
 # Load environment variables
 if os.getenv("REPLICATE_API_TOKEN") is None:
     load_dotenv('.env')
@@ -74,6 +77,16 @@ num_columns = st.sidebar.number_input(
     value=3
 )
 
+# Input number of epochs for music generation
+num_epochs = st.sidebar.slider(
+    label="Enter number of epochs for music generation",
+    min_value=1,
+    max_value=100,
+    step=1,
+    value=33
+)
+
+
 # Process video and create clips
 if st.button("Process Video"):
     if uploaded_file:
@@ -95,8 +108,51 @@ if video_path:
     st.write(f"Clip duration: {video_duration} seconds")
 
     # Generate music based on prompt
-    gened_music_url = music_generation(audio_prompt)
-    download_music(gened_music_url)
+    if os.getenv("LOCAL_INFERENCE"):
+        print("Running locally")
+
+
+
+        # Define the payload for the POST request
+        payload = {
+            "input": {
+              "alpha": 0,
+              "prompt_a": audio_prompt,
+              "denoising": 0.75,
+              "seed_image_id": "vibes",
+              "num_inference_steps": num_epochs
+            }
+          }
+
+        # Make the POST request
+        response = requests.post(url, json=payload)
+        response_dict = response.json()
+        print(response_dict)
+        import base64
+
+        # Base64-encoded audio string
+        audio_base64 = response_dict['output']['audio']
+
+        # Remove the data URL scheme (if present)
+        if audio_base64.startswith("data:audio/mpeg;base64,"):
+            audio_base64 = audio_base64.replace("data:audio/mpeg;base64,", "")
+
+        # Decode the Base64 string to binary data
+        audio_data = base64.b64decode(audio_base64)
+
+        # Write the binary data to a .wav file
+        directory_path = "./audio"
+        file_name = "gen_sound.wav"
+        file_path = os.path.join(directory_path, file_name)
+        with open(file_path, "wb") as audio_file:
+            audio_file.write(audio_data)
+
+        print("Audio file saved as output.wav")
+
+    else:
+        print("Running on Replicate")
+        gened_music_url = music_generation(audio_prompt, num_epochs)
+        download_music(gened_music_url)
 
     # Loop audio to match video duration
     loop_audio(audio_file, video_duration, looped_audio_file)
