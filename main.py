@@ -8,23 +8,22 @@ import replicate
 from dotenv import load_dotenv
 import subprocess
 import zipfile
+import base64
 
-
-
-from video_split import (
+from utils import(
     generate_ranges,
     split_video,
-    split_list
-)
-
-from audio_gen import (
+    split_list,
     music_generation,
     download_music,
     add_audio_to_video,
     get_video_duration,
     loop_audio,
-    remove_audio_from_video
+    remove_audio_from_video,
+    local_audio_generation,
+    download
 )
+
 
 # Define file paths
 video_path = None
@@ -111,50 +110,11 @@ if video_path:
     chosen_clip = created_clips[clip_number - 1]
     # Get video duration
     video_duration = get_video_duration(chosen_clip)
-    st.write(f"Clip duration: {video_duration} seconds")
 
     # Generate music based on prompt
     if os.getenv("LOCAL_INFERENCE"):
         print("Running locally")
-
-
-
-        # Define the payload for the POST request
-        payload = {
-            "input": {
-              "alpha": 0,
-              "prompt_a": audio_prompt,
-              "denoising": 0.75,
-              "seed_image_id": "vibes",
-              "num_inference_steps": num_epochs
-            }
-          }
-
-        # Make the POST request
-        response = requests.post(url, json=payload)
-        response_dict = response.json()
-        print(response_dict)
-        import base64
-
-        # Base64-encoded audio string
-        audio_base64 = response_dict['output']['audio']
-
-        # Remove the data URL scheme (if present)
-        if audio_base64.startswith("data:audio/mpeg;base64,"):
-            audio_base64 = audio_base64.replace("data:audio/mpeg;base64,", "")
-
-        # Decode the Base64 string to binary data
-        audio_data = base64.b64decode(audio_base64)
-
-        # Write the binary data to a .wav file
-        directory_path = "./audio"
-        file_name = "gen_sound.wav"
-        file_path = os.path.join(directory_path, file_name)
-        with open(file_path, "wb") as audio_file:
-            audio_file.write(audio_data)
-
-        print("Audio file saved as output.wav")
-
+        local_audio_generation(audio_prompt, num_epochs, selected_option, url)
     else:
         print("Running on Replicate")
         gened_music_url = music_generation(audio_prompt, num_epochs, selected_option)
@@ -189,12 +149,14 @@ if video_path:
                                                      loop=False,
                                                      autoplay=False,
                                                      muted=False)
-                        ste.download_button(
-                            label="Download " + os.path.basename(clip_path),
-                            data=clip_path,
-                            file_name=os.path.basename(clip_path),
-                            mime="video/mp4"
-                        )
+
+                        with open(clip_path, 'rb') as out_clip:
+                            ste.download_button(
+                                label="Download " + os.path.basename(clip_path),
+                                data=out_clip,
+                                file_name=os.path.basename(clip_path),
+                                mime="video/mp4"
+                            )
 
         created_clips.append(output_file)
 
@@ -216,24 +178,14 @@ if video_path:
                                          muted=False)
 
         with button_col:
-            ste.download_button(
-                label="Download Final Video",
-                data=output_file,
-                file_name=os.path.basename(output_file),
-                mime="video/mp4"
-            )
+            download(output_file, "video/mp4")
 
             with zipfile.ZipFile(zip_file_path, 'w') as zipf:
                 for clip_path in created_clips:
                     zipf.write(clip_path, os.path.basename(clip_path))
 
-            with open(zip_file_path, 'rb') as zip_file:
-                ste.download_button(
-                    label="Download All Clips as ZIP",
-                    data=zip_file,
-                    file_name=os.path.basename(zip_file_path),
-                    mime="clips/zip"
-                )
+            download(zip_file_path, "clips/zip")
+
 
 
 
