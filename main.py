@@ -134,18 +134,26 @@ if video_path:
                             mime="video/mp4"
                         )
 
+        created_clips.append(output_file)
 
         # Provide download link for the final video
+        output_video_container = st.container(border=True)
+        with output_video_container:
+            video_col, button_col = st.columns([0.7, 0.3])
 
-        st.write("Created clips:")
-        output_video_container, _ = st.columns([0.33, 0.67])
-        output_video_container.video(output_file, format="video/mp4", start_time=0, subtitles=None, end_time=None, loop=False,
-                 autoplay=False, muted=False)
+        with video_col:
+            st.write("Created clip with generated music:")
+            output_video_container, _ = st.columns([0.33, 0.67])
+            output_video_container.video(output_file,
+                                         format="video/mp4",
+                                         start_time=0,
+                                         subtitles=None,
+                                         end_time=None,
+                                         loop=False,
+                                         autoplay=False,
+                                         muted=False)
 
-        created_clips.append(output_file)
-        download_clip, download_zip = st.columns(2)
-
-        with download_clip:
+        with button_col:
             ste.download_button(
                 label="Download Final Video",
                 data=output_file,
@@ -153,12 +161,11 @@ if video_path:
                 mime="video/mp4"
             )
 
-        with download_zip:
+
             with zipfile.ZipFile(zip_file_path, 'w') as zipf:
                 for clip_path in created_clips:
                     zipf.write(clip_path, os.path.basename(clip_path))
 
-            # with open(zip_file_path, 'rb') as zip_file:
             ste.download_button(
                 label="Download All Clips as ZIP",
                 data=zip_file_path,
