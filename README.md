@@ -72,5 +72,5 @@ docker build -t poc_video_editor .
 
 2. Run the Docker container:
 ```shell
-docker run -p 8501:8501 poc_video_editor
+docker run -p 80:80 poc_video_editor
 ```

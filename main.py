@@ -77,7 +77,7 @@ num_columns = st.sidebar.number_input(
     value=3
 )
 
-st.write("Riffusion additional settings:")
+st.sidebar.write("Riffusion additional settings:")
 # Input number of epochs for music generation
 num_epochs = st.sidebar.slider(
     label="Enter number of epochs for music generation",
@@ -223,17 +223,17 @@ if video_path:
                 mime="video/mp4"
             )
 
-
             with zipfile.ZipFile(zip_file_path, 'w') as zipf:
                 for clip_path in created_clips:
                     zipf.write(clip_path, os.path.basename(clip_path))
 
-            ste.download_button(
-                label="Download All Clips as ZIP",
-                data=zip_file_path,
-                file_name=os.path.basename(zip_file_path),
-                mime="clips/zip"
-            )
+            with open(zip_file_path, 'rb') as zip_file:
+                ste.download_button(
+                    label="Download All Clips as ZIP",
+                    data=zip_file,
+                    file_name=os.path.basename(zip_file_path),
+                    mime="clips/zip"
+                )
 
 
 
