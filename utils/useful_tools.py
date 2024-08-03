@@ -23,22 +23,33 @@ def local_audio_generation(prompt, epochs, seed, url):
 
     # Define the payload for the POST request
     payload = {
-        "input": {
-            "alpha": 0,
-            "prompt_a": prompt,
-            "denoising": 0.75,
-            "seed_image_id": seed,
-            "num_inference_steps": epochs
-        }
+      "alpha": 0,
+      "num_inference_steps": epochs,
+      "seed_image_id": seed,
+
+      "start": {
+        "prompt": prompt,
+        "seed": 42,
+        "denoising": 0.75,
+        "guidance": 7.0
+      },
+
+      "end": {
+        "prompt": prompt,
+        "seed": 123,
+        "denoising": 0.75,
+        "guidance": 7.0
+      }
     }
 
     # Make the POST request
     response = requests.post(url, json=payload)
     response_dict = response.json()
     print(response_dict)
+    print(type(response_dict))
 
     # Base64-encoded audio string
-    audio_base64 = response_dict['output']['audio']
+    audio_base64 = response_dict['audio']
 
     # Remove the data URL scheme (if present)
     if audio_base64.startswith("data:audio/mpeg;base64,"):

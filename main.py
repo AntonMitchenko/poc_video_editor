@@ -31,7 +31,7 @@ output_file = "./video/output_video.mp4"
 zip_file_path = './video/all_clips.zip'
 
 # Define the URL for the POST request
-url = 'http://localhost:5000/predictions'
+url = 'http://127.0.0.1:3000/run_inference'
 
 # Load environment variables
 if os.getenv("REPLICATE_API_TOKEN") is None:
@@ -112,13 +112,13 @@ if video_path:
     video_duration = get_video_duration(chosen_clip)
 
     # Generate music based on prompt
-    if os.getenv("LOCAL_INFERENCE"):
-        print("Running locally")
-        local_audio_generation(audio_prompt, num_epochs, selected_option, url)
-    else:
-        print("Running on Replicate")
-        gened_music_url = music_generation(audio_prompt, num_epochs, selected_option)
-        download_music(gened_music_url)
+    # if os.getenv("LOCAL_INFERENCE"):
+    print("Running locally")
+    local_audio_generation(audio_prompt, num_epochs, selected_option, url)
+    # else:
+    #     print("Running on Replicate")
+    #     gened_music_url = music_generation(audio_prompt, num_epochs, selected_option)
+    #     download_music(gened_music_url)
 
     # Loop audio to match video duration
     loop_audio(audio_file, video_duration, looped_audio_file)
